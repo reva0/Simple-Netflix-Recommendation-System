@@ -1,99 +1,42 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[45]:
-
-
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.offline import init_notebook_mode, iplot
 
-
-# In[3]:
-
-
 df = pd.read_csv("netflix_titles.csv", encoding = 'utf-8')
-
-
-# In[4]:
 
 
 df.shape
 
-
-# In[34]:
-
-
 df.head()
-
-
-# In[5]:
 
 
 df.isna().sum()
 
 
-# In[ ]:
-
-
 # since a lot of columns in director column are NaN, I am dropping that column
-
-
-# In[6]:
 
 
 df = df.drop(columns = ['description','date_added','rating','show_id','director'])
 
 
-# In[7]:
-
-
-df.shape
-
-
-# In[49]:
-
-
-df.head()
-
-
-# In[50]:
-
-
 df['type'].value_counts()
-
-
-# In[17]:
 
 
 df['release_year'].value_counts()
 
-
-# In[ ]:
-
-
 # Sorting by release year and dropping the year from 1925 to 2005 as the count is small and it has NaN values
-
-
-# In[37]:
 
 
 sorted_df = df.sort_values('release_year')
 
-
-# In[38]:
-
-
 df = sorted_df.iloc[574:]
 
 
-# In[39]:
-
 
 df.head()
-
-
-# In[59]:
 
 
 ## add new features in the dataset
@@ -102,20 +45,11 @@ df['season_count'] = df.apply(lambda x : x['duration'].split(" ")[0] if "Season"
 df['duration'] = df.apply(lambda x : x['duration'].split(" ")[0] if "Season" not in x['duration'] else "", axis = 1)
 df.head()
 
-
-# In[40]:
-
-
 df.isna().sum()
 
 
-# In[41]:
-
 
 df.shape
-
-
-# In[47]:
 
 
 col = "type"
@@ -129,21 +63,14 @@ fig = go.Figure(data = [trace], layout = layout)
 iplot(fig)
 
 
-# In[50]:
-
 
 import matplotlib.pyplot as plt
 get_ipython().run_line_magic('matplotlib', 'inline')
 df['release_year'].hist(bins=5)
 
 
-# In[ ]:
-
 
 ## TOP ACTORS - FROM MOVIES LIST
-
-
-# In[60]:
 
 
 from collections import Counter
@@ -181,13 +108,7 @@ fig.update_layout(height=1200, showlegend=False)
 fig.show()
 
 
-# In[ ]:
-
-
 ## TOP ACTORS - FROM TV LIST
-
-
-# In[70]:
 
 
 traces = []
@@ -206,26 +127,9 @@ fig.update_layout(height=900, showlegend=False)
 fig.show()                                
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
 ## nothing to predict (no target variable), use clustering and groupby genre / cast
 
-
-# In[76]:
-
-
 df.isna().sum()
-
-
-# In[95]:
-
 
 new_df = df[['title','cast','listed_in','country']]
 new_df.head()
@@ -243,20 +147,10 @@ for i,col in new_df.iterrows():  # iterate over the DataFrame
 new_df.drop(blanks, inplace=True)
 
 
-# In[96]:
-
-
 new_df.head()
 
 
-# In[80]:
-
-
 new_df.shape
-
-
-# In[97]:
-
 
 new_df['cast'] = new_df['cast'].map(lambda x: x.split(',')[:3])
 
@@ -271,30 +165,13 @@ for index, row in new_df.iterrows():
     row['cast'] = [x.lower().replace(' ','') for x in row['cast']]
 #     row['director'] = ''.join(row['director']).lower()
 
-
-# In[98]:
-
-
 new_df.set_index('title', inplace = True)
 new_df.head()
-
-
-# In[ ]:
-
-
-
-
-
-# In[86]:
 
 
 # generating the cosine similarity matrix
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
-
-
-# In[99]:
-
 
 # Joining words
 
@@ -311,13 +188,7 @@ for index, row in new_df.iterrows():
 new_df.drop(columns = [col for col in new_df.columns if col!= 'words'], inplace = True)
 
 
-# In[100]:
-
-
 new_df.head()
-
-
-# In[112]:
 
 
 # instantiating and generating the count matrix
@@ -330,20 +201,8 @@ indices = pd.Series(new_df.index)
 indices[:5]
 
 
-# In[102]:
-
-
 cosine_sim = cosine_similarity(count_matrix, count_matrix)
 cosine_sim
-
-
-# In[ ]:
-
-
-
-
-
-# In[103]:
 
 
 def recommendations(Title, cosine_sim = cosine_sim):
@@ -366,20 +225,9 @@ def recommendations(Title, cosine_sim = cosine_sim):
     return recommended_movies
 
 
-# In[108]:
-
 
 recommendations("Atlantics")
 
-
-# In[110]:
-
-
 recommendations("Good People")
 
-
-# In[107]:
-
-
 recommendations("The Zoya Factor")
-
